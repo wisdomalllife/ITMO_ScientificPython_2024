@@ -8,6 +8,9 @@ Original file is located at
 """
 
 import requests
+import json
+import re
+import numpy as np
 
 """Uniprot"""
 
@@ -18,9 +21,8 @@ resp =  requests.get("https://rest.uniprot.org/uniprotkb/accessions", params={'a
 
 resp = resp.json()
 
-resp['results'][0].keys()
-
-resp['results'][0]['genes']
+print('Response keys:', resp['results'][0].keys() )
+print('Response genes:', resp['results'][0]['genes'])
 
 def get_uniprot(ids: list):
   accessions = ','.join(ids)
@@ -41,33 +43,21 @@ def uniprot_parse_response(resp: dict):
 
     return output
 
+"""Testing"""
+
 my_ids = ['O60494', 'Q9JLB4']
 resp = get_uniprot(my_ids)
 uniprot_parse_response(resp)
 
 """ENSEMBL"""
 
-import json
-
 id = json.dumps({'ids' : ['ENSG00000157764', 'ENSG00000248378']})
-id
-
-resp =  requests.get("https://rest.ensembl.org/lookup/id", params=id)
-resp.url
-
 headers={ "Content-Type" : "application/json", "Accept" : "application/json"}
 resp = requests.post("https://rest.ensembl.org/lookup/id", headers=headers, data=id)
-
 resp = resp.json()
 
-resp.keys()
-
-resp
-
-repr(resp)
-
-for key, value in resp.items():
-    print('ITEM {}: {}'.format(key, value))
+print('Response keys:', resp.keys())
+print('Response in readable format:', repr(resp))
 
 def get_ensembl(ids: list):
   id = json.dumps({'ids': ids})
@@ -90,17 +80,16 @@ def ensembl_parse_response(resp: dict):
         output[key] = {'organism':species, 'start': start, 'end': end, 'Info':descr, 'object_type':otype, 'biotype':biotype}
     return output
 
+"""Testing"""
+
 my_ids = ['ENSG00000157764', 'ENSG00000248378']
 resp = get_ensembl(my_ids)
 ensembl_parse_response(resp)
 
 """Task2"""
 
-import re
-import numpy as np
-
 """https://www.ensembl.org/info/genome/stable_ids/prefixes.html"""
-
+"""Regular expressions for ID"""
 #RE Uniprot:
 reuni = '[OPQ][0-9][A-Z0-9]{3}[0-9]|[A-NR-Z][0-9]([A-Z][A-Z0-9]{2}[0-9]){1,2}'
 
@@ -112,17 +101,19 @@ resem = 'ENS[A-Z]{1,6}[0-9]{11}|MGP_[A-Za-z0-9]{2,10}_(E|G|P|R|T|GT|FM)[0-9]+'
 
 def parse_response(ids: list):
   if np.all([bool(re.match(reuni, gene)) for gene in ids]):
-    print("Uni")
+    print("Uniprot ID")
     resp = get_uniprot(ids)
     output = uniprot_parse_response(resp)
   elif np.all([bool(re.match(resem, gene)) for gene in ids]):
-    print("Ens")
+    print("Ensembl ID")
     resp = get_ensembl(ids)
     output = ensembl_parse_response(resp)
   else:
     print("Not match")
     return
   return output
+
+"""Testing"""
 
 my_ids = ['ENSG00000157764', 'ENSG00000248378','ENSDARG00000024771']
 #my_ids = ['MGP_129S1SvImJ_G0019185', 'MGP_NODShiLtJ_G0019038','MGP_LPJ_G0019086']
