@@ -96,7 +96,7 @@ class Car():
     self.state = True
     Car.total += 1
 
-  def accelerate(self, upper_border=None, step=None):
+  def accelerate(self, upper_border=None, step=10):
     # check for state
     # create an instance of IncreaseSpeed iterator
     # check if smth passed to upper_border and if it is valid speed value
@@ -106,18 +106,18 @@ class Car():
     # return the message with current speed
     if self.state:
       if upper_border != None and upper_border <= self.max_speed: # can add step option checking
-        for s in IncreaseSpeed(self.current_speed, upper_border):
+        for s in IncreaseSpeed(self.current_speed, upper_border,step):
           self.current_speed = s
           print('speed increases:', self.current_speed)
-      elif self.current_speed + 10 <= self.max_speed:
-        self.current_speed += 10
+      elif self.current_speed + step <= self.max_speed:
+        self.current_speed += step
         print('current speed:', self.current_speed)
       else: print('max speed:', self.current_speed)
     else:
       print('not on the road')
 
 
-  def brake(self, lower_border=None, step=None):
+  def brake(self, lower_border=None, step=10):
     # create an instance of DecreaseSpeed iterator
     # check if smth passed to lower_border and if it is valid speed value
     # if True, decrease the speed gradually iterating over your decreaser until lower_border is met
@@ -125,11 +125,11 @@ class Car():
     # else increase the speed once
     # return the message with current speed
     if lower_border != None and lower_border >= 0:
-      for s in DecreaseSpeed(self.current_speed, lower_border):
+      for s in DecreaseSpeed(self.current_speed, lower_border,step):
         self.current_speed = s
         print('speed decreases:', self.current_speed)
-    elif self.current_speed - 10 >= 0:
-      self.current_speed -= 10
+    elif self.current_speed - step >= 0:
+      self.current_speed -= step
       print('current speed:', self.current_speed)
     else: print('too slow:', self.current_speed)
 
@@ -186,11 +186,11 @@ Car.total_cars() # 2
 Car.show_weather()
 toyota.accelerate() # 80
 toyota.brake(60)
-shkoda.accelerate(150)
+shkoda.accelerate(150,20)
 shkoda.parking()
 shkoda.accelerate(250) # not on the road
 Car.total_cars() # 1
 sportcar = Car(500, 250)
 Car.total_cars() # 2
-sportcar.brake(0)
+sportcar.brake(0,50)
 sportcar.brake() # too slow: 0
